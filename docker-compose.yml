@@ -1,0 +1,35 @@
+version: '2'
+services:
+  gitlab:
+    image: 'docker.io/gitlab/gitlab-ce:11.1.1-ce.0'
+    restart: always
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://git.lianwiki.cn'
+    ports:
+      - '8888:80'
+      - '8443:443'
+      - '22:22'
+    volumes:
+      - '/data/gitlab/config:/etc/gitlab'
+      - '/data/gitlab/logs:/var/log/gitlab'
+      - '/data/gitlab/data:/var/opt/gitlab'
+  runner:
+    image: 'docker.io/gitlab/gitlab-runner:latest'
+    restart: always
+    depends_on:
+      - gitlab
+    volumes:
+      - '/data/gitlab-runner/config:/etc/gitlab-runner'
+  runner-register:
+    image: 'docker.io/gitlab/gitlab-runner:latest'
+    restart: 'no'
+    command: register --locked=false
+    environment:
+      - CI_SERVER_URL=http://git.lianwiki.cn/
+      - REGISTRATION_TOKEN=biu5x-HBoTNaFN-ckZCu
+      - RUNNER_NAME=worker
+      - REGISTER_NON_INTERACTIVE=true
+      - RUNNER_EXECUTOR=shell
+    volumes:
+      - '/data/gitlab-runner/config:/etc/gitlab-runner'
